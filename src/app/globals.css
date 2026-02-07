@@ -1,26 +1,273 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #e3e3e3;
+  --panel: #dddddd;
+  --wall: #d3d3d3;
+  --text: #101015;
+  --gold: #f0c308;
+  --silver: #a8aab1;
+  --bronze: #e8a35d;
+  --line: #2d2d33;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+
+.ui-shell {
+  min-height: 100dvh;
+  padding: 10px;
+}
+
+.ui-frame {
+  margin: 0 auto;
+  max-width: 720px;
+  background: var(--panel);
+  padding: 28px;
+}
+
+.reward-wall {
+  background: var(--wall);
+  padding: 16px 20px 20px;
+}
+
+.reward-title {
+  margin: 0;
+  text-align: center;
+  font-size: 52px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.task-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 26px;
+}
+
+.task-chip {
+  border: 0;
+  border-radius: 20px;
+  font-size: 24px;
+  padding: 14px 18px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.task-gold {
+  background: var(--gold);
+}
+
+.task-silver {
+  background: var(--silver);
+}
+
+.task-bronze {
+  background: var(--bronze);
+}
+
+.custom-hint {
+  margin-top: 14px;
+  margin-bottom: 10px;
+  text-align: right;
+  font-size: 45px;
+  font-weight: 600;
+}
+
+.entry-form {
+  position: relative;
+  z-index: 2;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.field-label {
+  font-size: 44px;
+  font-weight: 500;
+}
+
+.field-wrap {
+  border: 2px solid var(--line);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.52);
+  display: flex;
+  align-items: center;
+  padding-right: 18px;
+}
+
+.field-input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 38px;
+  padding: 18px 20px;
+  color: #1f1f29;
+}
+
+.field-icon {
+  font-size: 38px;
+  opacity: 0.9;
+}
+
+.save-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.save-btn {
+  border: 0;
+  border-radius: 999px;
+  background: var(--bronze);
+  color: #1f1d1c;
+  font-size: 46px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 18px 56px;
+  cursor: pointer;
+}
+
+.coin-scene {
+  position: relative;
+  margin-top: -20px;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pig-mark {
+  position: absolute;
+  top: -162px;
+  font-size: 360px;
+  line-height: 1;
+  opacity: 0.27;
+  filter: saturate(1.1);
+  user-select: none;
+}
+
+.coin-bowl {
+  position: relative;
+  width: 300px;
+  height: 178px;
+}
+
+.bowl-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.coins-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.coin-dot {
+  position: absolute;
+  font-size: 46px;
+  line-height: 1;
+}
+
+.coin-fall {
+  animation: coinFall 900ms ease-out;
+}
+
+.total-points {
+  margin-top: 10px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+@keyframes coinFall {
+  0% {
+    transform: translateY(-220px) scale(1.1);
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .ui-frame {
+    padding: 14px;
+  }
+
+  .reward-title {
+    font-size: 26px;
+  }
+
+  .task-grid {
+    gap: 10px;
+  }
+
+  .task-chip {
+    font-size: 14px;
+    padding: 12px 10px;
+  }
+
+  .custom-hint {
+    font-size: 20px;
+  }
+
+  .field-row {
+    grid-template-columns: 64px minmax(0, 1fr);
+    margin-bottom: 12px;
+  }
+
+  .field-label {
+    font-size: 36px;
+  }
+
+  .field-input {
+    font-size: 32px;
+    padding: 12px 14px;
+  }
+
+  .field-icon {
+    font-size: 30px;
+  }
+
+  .save-btn {
+    font-size: 34px;
+    padding: 12px 34px;
+  }
+
+  .coin-scene {
+    min-height: 340px;
+  }
+
+  .pig-mark {
+    top: -132px;
+    font-size: 260px;
+  }
+
+  .coin-dot {
+    font-size: 34px;
+  }
 }
