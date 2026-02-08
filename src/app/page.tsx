@@ -75,7 +75,7 @@ function coinPos(index: number) {
 
 export default function Page() {
   const [records, setRecords] = useState<RecordItem[]>([]);
-  const [title, setTitle] = useState("剛剛我完成了");
+  const [title, setTitle] = useState("");
   const [occurredAtLocal, setOccurredAtLocal] = useState(nowLocalDatetimeValue);
   const [minutes, setMinutes] = useState(10);
   const [note, setNote] = useState("隨意寫寫");
@@ -174,6 +174,7 @@ export default function Page() {
             type="text"
             value={title}
             onChange={onTitleChange}
+            placeholder="剛剛我完成了"
           />
           <FieldRow
             label="時間"
@@ -190,7 +191,12 @@ export default function Page() {
           <FieldRow label="備註" type="text" value={note} onChange={setNote} />
 
           <div className="save-row">
-            <button type="button" className="save-btn" onClick={saveRecord}>
+            <button
+              type="button"
+              className="save-btn"
+              onClick={saveRecord}
+              disabled={!title.trim()}
+            >
               儲存
             </button>
           </div>
@@ -264,11 +270,13 @@ function FieldRow({
   type,
   value,
   onChange,
+  placeholder,
 }: {
   label: string;
   type: "text" | "datetime-local" | "number";
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
 }) {
   return (
     <label className="field-row">
@@ -279,6 +287,7 @@ function FieldRow({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="field-input"
+          placeholder={placeholder}
         />
         <span className="field-icon" aria-hidden>
           ✎

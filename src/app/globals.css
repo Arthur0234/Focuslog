@@ -20,11 +20,15 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .ui-shell {
   min-height: 100dvh;
-  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-right: max(10px, env(safe-area-inset-right));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  padding-left: max(10px, env(safe-area-inset-left));
 }
 
 .ui-frame {
@@ -145,6 +149,11 @@ body {
   cursor: pointer;
 }
 
+.save-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .coin-scene {
   position: relative;
   margin-top: -20px;
@@ -219,7 +228,7 @@ body {
   }
 
   .reward-title {
-    font-size: 26px;
+    font-size: 32px;
   }
 
   .task-grid {
@@ -241,11 +250,11 @@ body {
   }
 
   .field-label {
-    font-size: 36px;
+    font-size: 22px;
   }
 
   .field-input {
-    font-size: 32px;
+    font-size: 20px;
     padding: 12px 14px;
   }
 
@@ -254,7 +263,7 @@ body {
   }
 
   .save-btn {
-    font-size: 34px;
+    font-size: 30px;
     padding: 12px 34px;
   }
 
