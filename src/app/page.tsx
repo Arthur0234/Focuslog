@@ -47,12 +47,6 @@ function tierClass(tier: Tier) {
   return "task-bronze";
 }
 
-function tierMedal(tier: Tier) {
-  if (tier === "gold") return "🏆";
-  if (tier === "silver") return "🥈";
-  return "🥉";
-}
-
 function tierLabel(tier: Tier) {
   if (tier === "gold") return "金牌";
   if (tier === "silver") return "銀牌";
@@ -206,6 +200,13 @@ export default function Page() {
     () => records.reduce((sum, item) => sum + item.points, 0),
     [records]
   );
+  const level = Math.max(1, Math.floor(totalPoints / 1000) + 1);
+  const levelProgress = totalPoints % 1000;
+  const levelProgressPct = Math.min(100, Math.round((levelProgress / 1000) * 100));
+  const activeDays = useMemo(() => {
+    const set = new Set(records.map((item) => item.occurredAt.slice(0, 10)));
+    return set.size;
+  }, [records]);
 
   const currentWeek = weekKey(new Date());
   const isGoldLocked = goldLastEditedWeek === currentWeek;
@@ -243,13 +244,16 @@ export default function Page() {
   function saveRecord() {
     const trimmed = title.trim();
     if (!trimmed) return;
+    const safeMinutes = Number.isFinite(minutes)
+      ? Math.max(0, Math.min(1440, Math.floor(minutes)))
+      : 0;
 
     const item: RecordItem = {
       id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
       title: trimmed,
       tier,
       points,
-      minutes: Number.isFinite(minutes) ? Math.max(0, Math.floor(minutes)) : 0,
+      minutes: safeMinutes,
       note,
       occurredAt: toIso(occurredAtLocal),
     };
@@ -339,6 +343,30 @@ export default function Page() {
   return (
     <main className="ui-shell">
       <div className="ui-frame">
+        <section className="playful-hero">
+          <div className="hero-main">
+            <h1 className="hero-title">Focuslog Adventure</h1>
+            <p className="hero-sub">今天也把專注變成點數吧</p>
+            <div className="hero-stats">
+              <div className="hero-stat">
+                <span className="hero-stat-label">等級</span>
+                <strong className="hero-stat-value">Lv.{level}</strong>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-stat-label">活躍天數</span>
+                <strong className="hero-stat-value">{activeDays} 天</strong>
+              </div>
+            </div>
+            <div className="xp-track" aria-label="等級進度">
+              <div className="xp-fill" style={{ width: `${levelProgressPct}%` }} />
+            </div>
+            <p className="xp-label">升到 Lv.{level + 1} 還差 {1000 - levelProgress} 點</p>
+          </div>
+          <div className="hero-mascot" aria-hidden>
+            <MascotIcon />
+          </div>
+        </section>
+
         <section className="reward-wall">
           <h1 className="reward-title">獎金牆</h1>
           <div className="task-grid">
@@ -351,7 +379,7 @@ export default function Page() {
                 }`}
                 onClick={() => pickTask(task)}
               >
-                <span>{tierMedal(task.tier)}</span>
+                <TierBadge tier={task.tier} />
                 <span>{task.title}</span>
                 <span>{task.points}點</span>
               </button>
@@ -423,7 +451,10 @@ export default function Page() {
             label="時數"
             type="number"
             value={String(minutes)}
-            onChange={(v) => setMinutes(parseInt(v || "0", 10))}
+            onChange={(v) => {
+              const parsed = parseInt(v || "0", 10);
+              setMinutes(Number.isFinite(parsed) ? parsed : 0);
+            }}
           />
           <FieldRow label="備註" type="text" value={note} onChange={setNote} />
 
@@ -440,7 +471,7 @@ export default function Page() {
         </section>
 
         <section className="coin-scene">
-          <div className="pig-mark">🐷</div>
+          <div className="pig-mark" aria-hidden />
 
           <div className="coin-bowl">
             <svg viewBox="0 0 280 150" className="bowl-svg" aria-hidden>
@@ -488,7 +519,7 @@ export default function Page() {
                     className={`coin-dot ${isNew ? "coin-fall" : ""}`}
                     style={{ left: `${pos.left}px`, top: `${pos.top}px` }}
                   >
-                    {tierMedal(record.tier)}
+                    <TierBadge tier={record.tier} compact />
                   </span>
                 );
               })}
@@ -508,7 +539,9 @@ export default function Page() {
               {records.map((item) => (
                 <div key={item.id} className="jar-item">
                   <div className="jar-item-main">
-                    <span className={`jar-tier ${tierClass(item.tier)}`}>{tierMedal(item.tier)}</span>
+                    <span className={`jar-tier ${tierClass(item.tier)}`}>
+                      <TierBadge tier={item.tier} compact />
+                    </span>
                     {editingRecordId === item.id ? (
                       <input
                         value={editingRecordTitle}
@@ -581,13 +614,81 @@ function FieldRow({
           onChange={(e) => onChange(e.target.value)}
           className="field-input"
           placeholder={placeholder}
+          min={type === "number" ? 0 : undefined}
+          max={type === "number" ? 1440 : undefined}
         />
         {showIcon ? (
           <span className="field-icon" aria-hidden>
-            ✎
+            <PencilIcon />
           </span>
         ) : null}
       </span>
     </label>
+  );
+}
+
+function TierBadge({ tier, compact = false }: { tier: Tier; compact?: boolean }) {
+  const bg =
+    tier === "gold" ? "var(--gold-badge)" : tier === "silver" ? "var(--silver-badge)" : "var(--bronze-badge)";
+  const stroke =
+    tier === "gold"
+      ? "var(--gold-badge-border)"
+      : tier === "silver"
+        ? "var(--silver-badge-border)"
+        : "var(--bronze-badge-border)";
+  const size = compact ? 18 : 22;
+  const text = tier === "gold" ? "G" : tier === "silver" ? "S" : "B";
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      className="tier-badge-icon"
+      aria-hidden
+      focusable="false"
+    >
+      <circle cx="12" cy="12" r="10" fill={bg} stroke={stroke} strokeWidth="2" />
+      <text x="12" y="16" textAnchor="middle" className="tier-badge-label">
+        {text}
+      </text>
+    </svg>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden focusable="false">
+      <path
+        d="M4 20H8L18.4 9.6L14.4 5.6L4 16V20Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M12.9 7.1L16.9 11.1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M4 20L8 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MascotIcon() {
+  return (
+    <svg width="146" height="146" viewBox="0 0 146 146" focusable="false">
+      <defs>
+        <linearGradient id="mascotBody" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#8cf2b2" />
+          <stop offset="100%" stopColor="#53d38b" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="73" cy="85" rx="49" ry="42" fill="url(#mascotBody)" />
+      <circle cx="53" cy="68" r="7" fill="#1f3a2d" />
+      <circle cx="93" cy="68" r="7" fill="#1f3a2d" />
+      <path d="M55 93C63 103 83 103 91 93" fill="none" stroke="#1f3a2d" strokeWidth="5" strokeLinecap="round" />
+      <circle cx="43" cy="84" r="6" fill="#ff8ea2" opacity="0.7" />
+      <circle cx="103" cy="84" r="6" fill="#ff8ea2" opacity="0.7" />
+      <path d="M50 43C57 28 71 21 73 21C75 21 89 28 96 43" fill="#53d38b" />
+      <circle cx="73" cy="21" r="7" fill="#ffd166" stroke="#e3ae34" strokeWidth="2" />
+    </svg>
   );
 }
